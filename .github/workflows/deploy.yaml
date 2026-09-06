@@ -1,0 +1,34 @@
+name: Deploy Hugo Blog
+
+on:
+  push:
+    branches:
+      - main  # 如果你的默认分支是 master，请修改为 master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive  # 如果你的主题是 git submodule，请开启递归拉取
+          fetch-depth: 0         # 获取所有提交记录，确保最后修改时间准确
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true  # 如果你的主题需要 Hugo Extended 版本，设为 true
+
+      - name: Build
+        run: hugo --minify
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages  # 部署到的目标分支
+          personal_token: # 如果你部署到另一个用户名仓库或需要更高权限，可配置 Personal Access Token
+          keep_files: false
